@@ -160,11 +160,11 @@ function exportFormData() {
     URL.revokeObjectURL(url);
 
     if (typeof showToast === 'function')
-      showToast('✓ Progresso exportado com sucesso!', 'success');
+      showToast('✓ Progresso salvo com sucesso!', 'success');
   } catch (e) {
     console.error('[storage] exportFormData error:', e);
     if (typeof showToast === 'function')
-      showToast('Erro ao exportar. Tente novamente.', 'error');
+      showToast('Erro ao salvar dados. Tente novamente.', 'error');
   }
 }
 
@@ -201,7 +201,7 @@ function importFormData(file) {
         ? new Date(parsed.savedAt).toLocaleString('pt-BR')
         : 'desconhecida';
       if (typeof showToast === 'function')
-        showToast('⬆ Progresso importado! (salvo em ' + dateStr + ')', 'success');
+        showToast('⬆ Progresso restaurado! (salvo em ' + dateStr + ')', 'success');
 
     } catch (err) {
       console.error('[storage] importFormData error:', err);

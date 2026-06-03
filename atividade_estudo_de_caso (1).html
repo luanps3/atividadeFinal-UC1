@@ -1350,8 +1350,8 @@ hr { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
           <div class="save-dot" id="save-dot"></div>
           <span id="save-label">Pronto</span>
         </div>
-        <button class="btn-xs" id="btn-export" onclick="exportFormData()" title="Exportar progresso como JSON">⬇ Exportar</button>
-        <button class="btn-xs" id="btn-import" onclick="document.getElementById('import-file-input').click()" title="Importar progresso de JSON">⬆ Importar</button>
+        <button class="btn-xs" id="btn-export" onclick="exportFormData()" title="Salvar dados do progresso como JSON">⬇ Salvar dados</button>
+        <button class="btn-xs" id="btn-import" onclick="document.getElementById('import-file-input').click()" title="Restaurar dados do progresso de JSON">⬆ Restaurar dados</button>
         <button class="btn-xs danger" id="btn-clear-all" onclick="confirmClearAll()" title="Limpar todos os dados">🗑 Limpar tudo</button>
       </div>
     </div>
@@ -1501,10 +1501,10 @@ function exportFormData() {
     a.download = 'atividade-estudo-de-caso-backup.json';
     a.click();
     URL.revokeObjectURL(url);
-    showToast('✓ Progresso exportado com sucesso!', 'success');
+    showToast('✓ Progresso salvo com sucesso!', 'success');
   } catch (e) {
     console.error('[Persistence] exportFormData error:', e);
-    showToast('Erro ao exportar. Tente novamente.', 'error');
+    showToast('Erro ao salvar dados. Tente novamente.', 'error');
   }
 }
 
@@ -1525,7 +1525,7 @@ function importFormData(file) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed.data));
       updateSaveStatus('saved', parsed.savedAt || new Date().toISOString());
       const dateStr = parsed.savedAt ? new Date(parsed.savedAt).toLocaleString('pt-BR') : 'desconhecida';
-      showToast('⬆ Progresso importado! (salvo em ' + dateStr + ')', 'success');
+      showToast('⬆ Progresso restaurado! (salvo em ' + dateStr + ')', 'success');
     } catch (err) {
       console.error('[Persistence] importFormData error:', err);
       showToast('Arquivo inválido ou corrompido. Verifique o JSON.', 'error');
