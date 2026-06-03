@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estudo de Caso — Escolha de Equipamento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #1a1a1e;
+  --ink2: #3a3a44;
+  --ink3: #72727e;
+  --line: #e4e4ea;
+  --bg: #f8f8fa;
+  --white: #ffffff;
+  --radius: 10px;
+  --t: 0.2s ease;
+
+  --c-ho: #2563eb;
+  --c-ho-pale: #eff6ff;
+  --c-ho-mid: #bfdbfe;
+
+  --c-es: #059669;
+  --c-es-pale: #ecfdf5;
+  --c-es-mid: #a7f3d0;
+
+  --c-gm: #dc2626;
+  --c-gm-pale: #fef2f2;
+  --c-gm-mid: #fecaca;
+
+  --current: var(--c-ho);
+  --current-pale: var(--c-ho-pale);
+  --current-mid: var(--c-ho-mid);
+}
+.ctx-ho { --current: var(--c-ho); --current-pale: var(--c-ho-pale); --current-mid: var(--c-ho-mid); }
+.ctx-es { --current: var(--c-es); --current-pale: var(--c-es-pale); --current-mid: var(--c-es-mid); }
+.ctx-gm { --current: var(--c-gm); --current-pale: var(--c-gm-pale); --current-mid: var(--c-gm-mid); }
+
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px 100px; }
+
+/* ── MASTHEAD ── */
+.masthead {
+  padding: 56px 0 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0;
+}
+.masthead-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 32px;
+  flex-wrap: wrap;
+}
+.masthead-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+.masthead h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.masthead h1 em {
+  font-style: italic;
+  color: var(--ink2);
+}
+.masthead-sub {
+  font-size: 14px;
+  color: var(--ink3);
+  max-width: 420px;
+  margin-top: 10px;
+  line-height: 1.55;
+}
+
+/* progress pills */
+.progress-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all var(--t);
+  user-select: none;
+}
+.pill:hover { border-color: #c8c8d4; color: var(--ink2); }
+.pill.done  { border-color: #22c55e; background: #f0fdf4; color: #166534; }
+.pill.active-ho { border-color: var(--c-ho); background: var(--c-ho-pale); color: var(--c-ho); }
+.pill.active-es { border-color: var(--c-es); background: var(--c-es-pale); color: var(--c-es); }
+.pill.active-gm { border-color: var(--c-gm); background: var(--c-gm-pale); color: var(--c-gm); }
+.pill-check {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+  transition: all var(--t);
+}
+.pill.done .pill-check { background: #22c55e; border-color: #22c55e; color: #fff; }
+
+/* ── TABS BAR ── */
+.tabs-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 32px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-bar::-webkit-scrollbar { display: none; }
+.tab-item {
+  padding: 14px 24px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: all var(--t);
+  user-select: none;
+}
+.tab-item:hover { color: var(--ink); }
+.tab-item.active { color: var(--current); border-bottom-color: var(--current); }
+
+/* ── PANEL ── */
+.panel { display: none; }
+.panel.active { display: block; animation: in .25s ease; }
+@keyframes in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SECTION ── */
+.section { margin-bottom: 40px; }
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.section-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--current);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+.section-hint {
+  font-size: 13px;
+  color: var(--ink3);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── CONTEXT HEADER ── */
+.ctx-header {
+  background: var(--current-pale);
+  border: 1px solid var(--current-mid);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.ctx-header h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.ctx-header p { font-size: 14px; color: var(--ink2); line-height: 1.6; margin-bottom: 12px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: var(--white);
+  border: 1px solid var(--current-mid);
+  color: var(--current);
+  letter-spacing: 0.03em;
+}
+
+/* ── ID ROW ── */
+.id-row { display: grid; grid-template-columns: 1fr 160px 160px; gap: 12px; margin-bottom: 28px; }
+@media (max-width: 600px) { .id-row { grid-template-columns: 1fr 1fr; } }
+
+/* ── FIELD ── */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.field input, .field textarea, .field select {
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 7px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+  width: 100%;
+  resize: vertical;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--current);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--current) 12%, transparent);
+}
+.field input::placeholder, .field textarea::placeholder { color: #b0b0be; }
+.field input.touched:invalid,
+.field textarea.touched:invalid { border-color: #f87171; }
+
+/* ── GRID CARDS ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 620px) { .two-col { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: border-color var(--t);
+}
+.card:hover { border-color: var(--current-mid); }
+.card.complete { border-color: #86efac; background: #f0fdf4; }
+
+.card-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--current);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.card-label::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--current);
+  opacity: 0.6;
+}
+
+.fields-stack { display: flex; flex-direction: column; gap: 12px; }
+.two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 440px) { .two-fields { grid-template-columns: 1fr; } }
+
+/* ── COMPONENT GRID ── */
+.comp-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
+
+.comp-item {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 12px 14px;
+}
+.comp-item-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+
+/* ── COMPARE TABLE ── */
+.table-scroll { overflow-x: auto; border-radius: var(--radius); border: 1.5px solid var(--line); }
+.compare-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.compare-table thead th {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink3);
+  font-weight: 500;
+}
+.compare-table thead th:first-child { color: var(--current); }
+.compare-table tbody tr { border-bottom: 1px solid var(--line); }
+.compare-table tbody tr:last-child { border-bottom: none; }
+.compare-table tbody td { padding: 0; vertical-align: middle; }
+.compare-table tbody td.row-lbl {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink2);
+  white-space: nowrap;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+}
+.compare-table tbody td input {
+  font-family: 'Geist', sans-serif;
+  font-size: 13.5px;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--ink);
+  transition: background var(--t);
+}
+.compare-table tbody td input:focus { background: var(--current-pale); }
+.compare-table tbody td { border-right: 1px solid var(--line); }
+.compare-table tbody td:last-child { border-right: none; }
+
+/* ── CONCLUSION ── */
+.conclusion-wrap {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.conclusion-wrap textarea { min-height: 160px; border-radius: 6px; }
+.char-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.char-count {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+}
+.char-count.warn { color: #f59e0b; }
+.char-count.ok   { color: #22c55e; }
+
+/* ── NOTICE ── */
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 7px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: #92400e;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.notice span:first-child { flex-shrink: 0; margin-top: 1px; }
+
+/* ── DIVIDER ── */
+hr { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
+
+/* ── CRITERIA ROWS ── */
+.criteria { display: flex; flex-direction: column; gap: 8px; }
+.criteria-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  gap: 12px;
+}
+.criteria-row span { font-size: 14px; color: var(--ink2); }
+.criteria-badge {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 100px;
+  background: var(--current-pale);
+  color: var(--current);
+  border: 1px solid var(--current-mid);
+  white-space: nowrap;
+}
+
+/* ── INFO GRID ── */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+@media (max-width: 500px) { .info-grid { grid-template-columns: 1fr; } }
+.info-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+.info-card strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink3); margin-bottom: 3px; }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 12px 20px;
+  z-index: 100;
+}
+.bottom-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.bottom-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+  transition: background var(--t);
+}
+.status-dot.done { background: #22c55e; }
+.bottom-text { font-size: 13px; color: var(--ink3); }
+.bottom-text strong { color: var(--ink2); }
+
+.btn-group { display: flex; gap: 10px; }
+.btn {
+  font-family: 'Geist', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--t);
+  white-space: nowrap;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--line);
+  color: var(--ink3);
+}
+.btn-ghost:hover { border-color: #b0b0be; color: var(--ink2); }
+.btn-primary {
+  background: var(--ink);
+  color: var(--white);
+  cursor: pointer;
+  transition: all var(--t);
+}
+.btn-primary:hover { background: var(--ink2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+/* ── PDF OVERLAY ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.overlay.show { display: flex; }
+.overlay-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 40px 48px;
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.overlay-card h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.overlay-card p { font-size: 13.5px; color: var(--ink3); margin-bottom: 24px; line-height: 1.5; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--line);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+.toast-container {
+  position: fixed;
+  bottom: 80px; right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 400;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 13.5px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  transform: translateX(20px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+  max-width: 320px;
+  min-width: 200px;
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast.toast-success { background: #166534; }
+.toast.toast-error   { background: #991b1b; }
+.toast.toast-info    { background: #1e3a5f; }
+.toast.toast-warning { background: #92400e; }
+.toast-icon { font-size: 16px; flex-shrink: 0; }
+.toast-msg  { flex: 1; line-height: 1.4; }
+
+/* ── SAVE STATUS ── */
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--ink3);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.save-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+  transition: background 0.4s ease;
+}
+.save-dot.saving  { background: #f59e0b; animation: pulse-dot 1s ease infinite; }
+.save-dot.saved   { background: #22c55e; }
+.save-dot.error   { background: #ef4444; }
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+  width: 100%;
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+
+/* ── PROGRESS PCT BADGE ── */
+.pct-badge {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #86efac;
+  transition: all 0.4s ease;
+}
+.pct-badge.warn { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.pct-badge.empty { background: var(--bg); color: var(--ink3); border-color: var(--line); }
+
+/* ── CONFIRM MODAL ── */
+.confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 32px 36px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  animation: in 0.25s ease;
+}
+.confirm-card h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.confirm-card p { font-size: 13.5px; color: var(--ink3); margin-bottom: 24px; line-height: 1.55; }
+.confirm-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-danger {
+  font-family: 'Geist', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #dc2626;
+  color: #fff;
+  transition: all var(--t);
+}
+.btn-danger:hover { background: #b91c1c; transform: translateY(-1px); }
+
+/* ── BOTTOM BAR EXTRAS ── */
+.bottom-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.bottom-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-xs {
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all var(--t);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-xs:hover { border-color: #b0b0be; color: var(--ink2); background: var(--bg); }
+.btn-xs.danger:hover { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
+
+/* ── PRINT (PDF source) ── */
+@media print {
+  body { background: white; font-size: 12px; }
+  .bottom-bar, .overlay, .toast-container, .tabs-bar, .confirm-overlay { display: none !important; }
+  .panel { display: block !important; page-break-after: always; }
+  .panel:last-child { page-break-after: avoid; }
+  .card { break-inside: avoid; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <div class="masthead-eyebrow">Atividade Prática · Estudo de Caso</div>
+        <h1>Escolha de <em>Equipamento</em></h1>
+        <p class="masthead-sub">Pesquise, compare e justifique a melhor solução de hardware para cada um dos três perfis abaixo. Todos os campos são obrigatórios.</p>
+      </div>
+      <div class="progress-pills">
+        <div class="pill active-ho" id="pill-ho" onclick="switchPanel('ho')">
+          <div class="pill-check" id="chk-ho"></div>
+          Designer Gráfico
+        </div>
+        <div class="pill" id="pill-es" onclick="switchPanel('es')">
+          <div class="pill-check" id="chk-es"></div>
+          Escritório
+        </div>
+        <div class="pill" id="pill-gm" onclick="switchPanel('gm')">
+          <div class="pill-check" id="chk-gm"></div>
+          PC Gamer
+        </div>
+      </div>
+    </div>
+    <div class="tabs-bar ctx-ho" id="tabs-bar">
+      <div class="tab-item active" id="tab-ho" onclick="switchPanel('ho')">🎨 Designer Gráfico</div>
+      <div class="tab-item" id="tab-es" onclick="switchPanel('es')">🏢 Escritório</div>
+      <div class="tab-item" id="tab-gm" onclick="switchPanel('gm')">🎮 PC Gamer</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ PANEL: DESIGNER GRÁFICO ═══ -->
+  <div class="panel ctx-ho active" id="panel-ho">
+
+    <div class="ctx-header">
+      <h2>Designer Gráfico — Criação de Conteúdo</h2>
+      <p>Um cliente recebeu uma proposta para trabalhar como designer gráfico e precisa de equipamento com alto desempenho gráfico. Ele utilizará regularmente os softwares abaixo:</p>
+      <div class="tags">
+        <span class="tag">Adobe Photoshop</span>
+        <span class="tag">Illustrator</span>
+        <span class="tag">Dreamweaver</span>
+        <span class="tag">Premiere Pro</span>
+        <span class="tag">After Effects</span>
+      </div>
+    </div>
+
+    <!-- Identificação -->
+    <div class="section">
+      <div class="id-row">
+        <div class="field">
+          <label>Nome(s) do(s) aluno(s)</label>
+          <input type="text" id="ho-nome" placeholder="Ex.: João Silva / Maria Souza" required>
+        </div>
+        <div class="field">
+          <label>Turma</label>
+          <input type="text" id="ho-turma" placeholder="Ex.: 3A" required>
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="ho-data" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. Notebooks -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <span class="section-title">Pesquisa de Notebooks</span>
+      </div>
+      <p class="section-hint">Pesquise dois modelos novos — um com processador Intel e outro AMD — adequados para uso intenso do pacote Adobe.</p>
+      <div class="two-col">
+        <div class="card" id="card-ho-nb-i">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-nb-i-modelo" placeholder="Ex.: Dell Inspiron 15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-nb-i-cpu" placeholder="Ex.: Intel Core i7-1355U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-nb-i-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-nb-i-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-nb-i-gpu" placeholder="Ex.: RTX 3050 4 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-ho-nb-a">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-nb-a-modelo" placeholder="Ex.: Lenovo IdeaPad 5" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-nb-a-cpu" placeholder="Ex.: AMD Ryzen 7 7730U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-nb-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-nb-a-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-nb-a-gpu" placeholder="Ex.: RX 6500M" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Desktop Pronto -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <span class="section-title">Computador Desktop Pronto</span>
+      </div>
+      <p class="section-hint">Pesquise dois computadores de fábrica (já montados), um Intel e um AMD.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-dt-i-modelo" placeholder="Ex.: HP Victus Desktop" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-dt-i-cpu" placeholder="Ex.: Intel Core i7-13700" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-dt-i-ram" placeholder="Ex.: 32 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-dt-i-hd" placeholder="Ex.: SSD 1 TB NVMe" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-dt-i-gpu" placeholder="Ex.: RTX 4060 8 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-dt-a-modelo" placeholder="Ex.: Lenovo Legion Tower" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-dt-a-cpu" placeholder="Ex.: AMD Ryzen 9 7900" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-dt-a-ram" placeholder="Ex.: 32 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-dt-a-hd" placeholder="Ex.: SSD 1 TB NVMe" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-dt-a-gpu" placeholder="Ex.: RX 7700 XT" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Montagem -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <span class="section-title">Montagem Personalizada</span>
+      </div>
+      <p class="section-hint">Monte uma configuração completa para cada plataforma. Liste marca, modelo, especificações e preço de cada componente.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="ho-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="ho-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="ho-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="ho-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="ho-mt-i-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="ho-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="ho-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="ho-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="ho-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="ho-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="ho-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="ho-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="ho-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="ho-mt-a-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="ho-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="ho-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="ho-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="ho-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Comparação -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <span class="section-title">Tabela Comparativa</span>
+      </div>
+      <p class="section-hint">Preencha com os dados dos melhores modelos encontrados em cada categoria.</p>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook</th><th>Desktop Pronto</th><th>Computador Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="ho-cmp-cpu-nb" required></td><td><input type="text" id="ho-cmp-cpu-dt" required></td><td><input type="text" id="ho-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="ho-cmp-ram-nb" required></td><td><input type="text" id="ho-cmp-ram-dt" required></td><td><input type="text" id="ho-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Armazenamento</td><td><input type="text" id="ho-cmp-hd-nb" required></td><td><input type="text" id="ho-cmp-hd-dt" required></td><td><input type="text" id="ho-cmp-hd-mt" required></td></tr>
+            <tr><td class="row-lbl">Placa de Vídeo</td><td><input type="text" id="ho-cmp-gpu-nb" required></td><td><input type="text" id="ho-cmp-gpu-dt" required></td><td><input type="text" id="ho-cmp-gpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Preço Total (R$)</td><td><input type="text" id="ho-cmp-preco-nb" required></td><td><input type="text" id="ho-cmp-preco-dt" required></td><td><input type="text" id="ho-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="ho-cmp-van-nb" required></td><td><input type="text" id="ho-cmp-van-dt" required></td><td><input type="text" id="ho-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="ho-cmp-des-nb" required></td><td><input type="text" id="ho-cmp-des-dt" required></td><td><input type="text" id="ho-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. Conclusão -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <span class="section-title">Conclusão</span>
+      </div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Justifique qual solução tem melhor custo-benefício considerando o perfil do cliente (desempenho Adobe, portabilidade, upgrade).</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="ho-conclusao" placeholder="Com base nas pesquisas realizadas..." required oninput="updateCount(this,'ho-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="ho-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-ho -->
+
+  <!-- ═══════════════════════════════════ PANEL: ESCRITÓRIO ═══ -->
+  <div class="panel ctx-es" id="panel-es">
+
+    <div class="ctx-header">
+      <h2>Escritório — Produtividade Corporativa</h2>
+      <p>Uma empresa precisa equipar estações de trabalho para o setor administrativo. O foco é produtividade, estabilidade, baixo custo de manutenção e facilidade de gerenciamento em rede.</p>
+      <div class="tags">
+        <span class="tag">Microsoft Office 365</span>
+        <span class="tag">Google Workspace</span>
+        <span class="tag">Teams / Zoom</span>
+        <span class="tag">ERPs corporativos</span>
+        <span class="tag">Navegador / E-mail</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="id-row">
+        <div class="field"><label>Nome(s) do(s) aluno(s)</label><input type="text" id="es-nome" placeholder="Ex.: João Silva / Maria Souza" required></div>
+        <div class="field"><label>Turma</label><input type="text" id="es-turma" placeholder="Ex.: 3A" required></div>
+        <div class="field"><label>Data</label><input type="date" id="es-data" required></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">01</span><span class="section-title">Notebooks Corporativos</span></div>
+      <p class="section-hint">Pesquise modelos voltados ao uso empresarial — durabilidade, garantia e ergonomia são diferenciais relevantes.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-nb-i-modelo" placeholder="Ex.: Lenovo ThinkPad E15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-nb-i-cpu" placeholder="Ex.: Intel Core i5-1235U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-nb-i-ram" placeholder="Ex.: 8 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-nb-i-hd" placeholder="Ex.: SSD 256 GB" required></div>
+            </div>
+            <div class="field"><label>Autonomia da Bateria</label><input type="text" id="es-nb-i-bat" placeholder="Ex.: até 10h" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-nb-a-modelo" placeholder="Ex.: HP EliteBook 845" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-nb-a-cpu" placeholder="Ex.: AMD Ryzen 5 7530U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-nb-a-ram" placeholder="Ex.: 8 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-nb-a-hd" placeholder="Ex.: SSD 256 GB" required></div>
+            </div>
+            <div class="field"><label>Autonomia da Bateria</label><input type="text" id="es-nb-a-bat" placeholder="Ex.: até 12h" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">02</span><span class="section-title">Desktops Prontos Corporativos</span></div>
+      <p class="section-hint">Priorize modelos com suporte técnico empresarial e boa disponibilidade de peças.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-dt-i-modelo" placeholder="Ex.: Dell OptiPlex 5000" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-dt-i-cpu" placeholder="Ex.: Intel Core i5-12500" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-dt-i-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-dt-i-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Conectividade</label><input type="text" id="es-dt-i-net" placeholder="Ex.: Wi-Fi 6, Bluetooth 5.2" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-dt-a-modelo" placeholder="Ex.: HP ProDesk 405" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-dt-a-cpu" placeholder="Ex.: AMD Ryzen 5 5600G" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-dt-a-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-dt-a-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Conectividade</label><input type="text" id="es-dt-a-net" placeholder="Ex.: Wi-Fi 6, Bluetooth 5.0" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">03</span><span class="section-title">Estação de Trabalho Personalizada</span></div>
+      <p class="section-hint">Monte configurações enxutas e eficientes — GPUs dedicadas não são necessárias para esse perfil.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="es-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="es-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="es-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="es-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="es-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="es-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete</div><div class="field"><input type="text" id="es-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-gab-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Periféricos</div><div class="field"><input type="text" id="es-mt-i-per" placeholder="Teclado + Mouse" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-per-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-per-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="es-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="es-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="es-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="es-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="es-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="es-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="es-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete</div><div class="field"><input type="text" id="es-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-gab-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Periféricos</div><div class="field"><input type="text" id="es-mt-a-per" placeholder="Teclado + Mouse" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-per-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-per-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="es-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">04</span><span class="section-title">Tabela Comparativa</span></div>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook</th><th>Desktop Pronto</th><th>Computador Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="es-cmp-cpu-nb" required></td><td><input type="text" id="es-cmp-cpu-dt" required></td><td><input type="text" id="es-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="es-cmp-ram-nb" required></td><td><input type="text" id="es-cmp-ram-dt" required></td><td><input type="text" id="es-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Armazenamento</td><td><input type="text" id="es-cmp-hd-nb" required></td><td><input type="text" id="es-cmp-hd-dt" required></td><td><input type="text" id="es-cmp-hd-mt" required></td></tr>
+            <tr><td class="row-lbl">Custo por unidade</td><td><input type="text" id="es-cmp-preco-nb" required></td><td><input type="text" id="es-cmp-preco-dt" required></td><td><input type="text" id="es-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Facilidade de manutenção</td><td><input type="text" id="es-cmp-man-nb" required></td><td><input type="text" id="es-cmp-man-dt" required></td><td><input type="text" id="es-cmp-man-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="es-cmp-van-nb" required></td><td><input type="text" id="es-cmp-van-dt" required></td><td><input type="text" id="es-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="es-cmp-des-nb" required></td><td><input type="text" id="es-cmp-des-dt" required></td><td><input type="text" id="es-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">05</span><span class="section-title">Conclusão</span></div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Considere: custo por unidade, escalabilidade para múltiplos postos, facilidade de manutenção e suporte técnico.</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="es-conclusao" placeholder="Com base nas pesquisas realizadas, para um ambiente corporativo..." required oninput="updateCount(this,'es-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="es-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-es -->
+
+  <!-- ═══════════════════════════════════ PANEL: PC GAMER ═══ -->
+  <div class="panel ctx-gm" id="panel-gm">
+
+    <div class="ctx-header">
+      <h2>PC Gamer — Alto Desempenho</h2>
+      <p>Um cliente quer montar ou adquirir um PC Gamer para jogar títulos AAA modernos com alta taxa de quadros, possibilitando também o streaming de gameplay.</p>
+      <div class="tags">
+        <span class="tag">Games AAA (1080p/1440p/4K)</span>
+        <span class="tag">OBS Studio</span>
+        <span class="tag">Discord</span>
+        <span class="tag">Steam / Epic</span>
+        <span class="tag">Alta taxa de FPS</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="id-row">
+        <div class="field"><label>Nome(s) do(s) aluno(s)</label><input type="text" id="gm-nome" placeholder="Ex.: João Silva / Maria Souza" required></div>
+        <div class="field"><label>Turma</label><input type="text" id="gm-turma" placeholder="Ex.: 3A" required></div>
+        <div class="field"><label>Data</label><input type="date" id="gm-data" required></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">01</span><span class="section-title">Notebooks Gamer</span></div>
+      <p class="section-hint">Priorize GPU dedicada com boa VRAM e tela com alta taxa de atualização (Hz).</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-nb-i-modelo" placeholder="Ex.: ASUS ROG Strix G15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-nb-i-cpu" placeholder="Ex.: Intel Core i7-13650HX" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-nb-i-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-nb-i-hd" placeholder="Ex.: SSD 1 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-nb-i-gpu" placeholder="Ex.: RTX 4060 8 GB" required></div>
+            <div class="field"><label>Display (Hz / resolução)</label><input type="text" id="gm-nb-i-tela" placeholder="Ex.: 144Hz Full HD IPS" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-nb-a-modelo" placeholder="Ex.: Lenovo Legion 5 Pro" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-nb-a-cpu" placeholder="Ex.: AMD Ryzen 7 7745HX" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-nb-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-nb-a-hd" placeholder="Ex.: SSD 1 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-nb-a-gpu" placeholder="Ex.: RX 7600M XT 8 GB" required></div>
+            <div class="field"><label>Display (Hz / resolução)</label><input type="text" id="gm-nb-a-tela" placeholder="Ex.: 165Hz 2K IPS" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">02</span><span class="section-title">Desktop Gamer Pronto</span></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-dt-i-modelo" placeholder="Ex.: Pichau Thunder Intel" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-dt-i-cpu" placeholder="Ex.: Intel Core i5-13600K" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-dt-i-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-dt-i-hd" placeholder="Ex.: SSD 500 GB + HD 2 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-dt-i-gpu" placeholder="Ex.: RTX 4070 12 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-dt-a-modelo" placeholder="Ex.: Pichau Thunder AMD" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-dt-a-cpu" placeholder="Ex.: AMD Ryzen 5 7600X" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-dt-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-dt-a-hd" placeholder="Ex.: SSD 500 GB + HD 2 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-dt-a-gpu" placeholder="Ex.: RX 7700 XT 12 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">03</span><span class="section-title">PC Gamer Personalizado</span></div>
+      <p class="section-hint">Monte o setup ideal. Lembre-se de equilibrar CPU e GPU para evitar gargalos, e use fonte com folga de potência.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="gm-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="gm-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="gm-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="gm-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="gm-mt-i-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="gm-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor Gamer</div><div class="field"><input type="text" id="gm-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="gm-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="gm-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="gm-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="gm-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="gm-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="gm-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="gm-mt-a-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="gm-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor Gamer</div><div class="field"><input type="text" id="gm-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="gm-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="gm-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">04</span><span class="section-title">Tabela Comparativa</span></div>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook Gamer</th><th>Desktop Pronto</th><th>PC Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="gm-cmp-cpu-nb" required></td><td><input type="text" id="gm-cmp-cpu-dt" required></td><td><input type="text" id="gm-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">GPU + VRAM</td><td><input type="text" id="gm-cmp-gpu-nb" required></td><td><input type="text" id="gm-cmp-gpu-dt" required></td><td><input type="text" id="gm-cmp-gpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="gm-cmp-ram-nb" required></td><td><input type="text" id="gm-cmp-ram-dt" required></td><td><input type="text" id="gm-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Taxa de Refresh (Hz)</td><td><input type="text" id="gm-cmp-hz-nb" required></td><td><input type="text" id="gm-cmp-hz-dt" required></td><td><input type="text" id="gm-cmp-hz-mt" required></td></tr>
+            <tr><td class="row-lbl">Preço Total (R$)</td><td><input type="text" id="gm-cmp-preco-nb" required></td><td><input type="text" id="gm-cmp-preco-dt" required></td><td><input type="text" id="gm-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="gm-cmp-van-nb" required></td><td><input type="text" id="gm-cmp-van-dt" required></td><td><input type="text" id="gm-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="gm-cmp-des-nb" required></td><td><input type="text" id="gm-cmp-des-dt" required></td><td><input type="text" id="gm-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">05</span><span class="section-title">Conclusão</span></div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Considere: FPS esperado nos títulos pesquisados, upgradabilidade futura, portabilidade e custo-benefício para gaming.</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="gm-conclusao" placeholder="Com base nas pesquisas realizadas, para um perfil gamer..." required oninput="updateCount(this,'gm-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="gm-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-gm -->
+
+</div><!-- /wrap -->
+
+<!-- HIDDEN FILE INPUT FOR IMPORT -->
+<input type="file" id="import-file-input" accept=".json" style="display:none">
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-card">
+    <h3 id="confirm-title">Confirmar ação</h3>
+    <p id="confirm-msg">Tem certeza?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <div class="bottom-left">
+      <div class="bottom-status">
+        <div class="status-dot" id="dot-ho"></div>
+        <div class="status-dot" id="dot-es"></div>
+        <div class="status-dot" id="dot-gm"></div>
+        <span class="bottom-text" id="status-text">Preencha os <strong>3 perfis</strong> para liberar a entrega</span>
+        <span id="progress-pct" class="pct-badge empty">0%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+      </div>
+      <div class="bottom-actions">
+        <div class="save-status" id="save-status">
+          <div class="save-dot" id="save-dot"></div>
+          <span id="save-label">Pronto</span>
+        </div>
+        <button class="btn-xs" id="btn-export" onclick="exportFormData()" title="Exportar progresso como JSON">⬇ Exportar</button>
+        <button class="btn-xs" id="btn-import" onclick="document.getElementById('import-file-input').click()" title="Importar progresso de JSON">⬆ Importar</button>
+        <button class="btn-xs danger" id="btn-clear-all" onclick="confirmClearAll()" title="Limpar todos os dados">🗑 Limpar tudo</button>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="clearCurrent()">Limpar aba atual</button>
+      <button class="btn btn-ghost" id="btn-submit-current" onclick="trySubmitCurrent()">Gerar PDF da Aba Atual</button>
+      <button class="btn btn-primary" id="btn-submit" onclick="trySubmit()">Gerar PDF Completo</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY PDF -->
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <div class="spinner"></div>
+    <h3>Gerando PDF…</h3>
+    <p>Compilando as respostas. Isso pode levar alguns segundos.</p>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// PERSISTENCE MODULE — Auto-save, Export, Import, Clear
+// ══════════════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'atividade_estudo_de_caso_v1';
+let _debounceTimer = null;
+let _isSaving = false;
+
+// ── COLLECT FORM STATE ──────────────────────────────────────────────
+function collectFormState() {
+  const state = { fields: {}, meta: {} };
+  try {
+    // Collect all inputs, textareas, selects by ID
+    document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+      if (!el.id) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        state.fields[el.id] = el.checked;
+      } else {
+        state.fields[el.id] = el.value;
+      }
+    });
+    // Meta state
+    state.meta.activePanel = currentPanel;
+    state.meta.scrollY = window.scrollY;
+    state.meta.timestamp = new Date().toISOString();
+  } catch (e) {
+    console.warn('[Persistence] collectFormState error:', e);
+  }
+  return state;
+}
+
+// ── RESTORE FORM STATE ──────────────────────────────────────────────
+function restoreFormState(state) {
+  if (!state || !state.fields) return;
+  try {
+    const fields = state.fields;
+    Object.keys(fields).forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = !!fields[id];
+        } else {
+          el.value = fields[id] || '';
+        }
+      } catch (fieldErr) {
+        // silently skip fields that can't be restored
+      }
+    });
+    // Restore char counters
+    ['ho','es','gm'].forEach(pfx => {
+      const ta = document.getElementById(pfx + '-conclusao');
+      const counter = document.getElementById(pfx + '-count');
+      if (ta && counter) {
+        const n = ta.value.length;
+        counter.textContent = n + ' caracteres';
+        counter.className = 'char-count' + (n >= 600 ? ' ok' : n >= 300 ? ' warn' : '');
+      }
+    });
+    // Restore active panel
+    if (state.meta && state.meta.activePanel) {
+      switchPanel(state.meta.activePanel);
+    }
+    // Restore scroll position after a tick
+    if (state.meta && state.meta.scrollY) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: state.meta.scrollY, behavior: 'instant' });
+      });
+    }
+    // Recompute progress indicators
+    checkAll();
+  } catch (e) {
+    console.warn('[Persistence] restoreFormState error:', e);
+  }
+}
+
+// ── SAVE FORM DATA ───────────────────────────────────────────────────
+function saveFormData() {
+  try {
+    updateSaveStatus('saving');
+    const state = collectFormState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateSaveStatus('saved', state.meta.timestamp);
+  } catch (e) {
+    console.error('[Persistence] saveFormData error:', e);
+    updateSaveStatus('error');
+  }
+}
+
+// ── LOAD FORM DATA ───────────────────────────────────────────────────
+function loadFormData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('[Persistence] loadFormData parse error:', e);
+    return null;
+  }
+}
+
+// ── DEBOUNCED SAVE ───────────────────────────────────────────────────
+function scheduleSave() {
+  clearTimeout(_debounceTimer);
+  updateSaveStatus('saving');
+  _debounceTimer = setTimeout(() => {
+    saveFormData();
+  }, 400);
+}
+
+// ── EXPORT FORM DATA ─────────────────────────────────────────────────
+function exportFormData() {
+  try {
+    const state = collectFormState();
+    const payload = {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      data: state
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'atividade-estudo-de-caso-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ Progresso exportado com sucesso!', 'success');
+  } catch (e) {
+    console.error('[Persistence] exportFormData error:', e);
+    showToast('Erro ao exportar. Tente novamente.', 'error');
+  }
+}
+
+// ── IMPORT FORM DATA ─────────────────────────────────────────────────
+function importFormData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // Validate structure
+      if (!parsed || !parsed.data || !parsed.data.fields) {
+        throw new Error('Estrutura inválida');
+      }
+      // Restore state
+      restoreFormState(parsed.data);
+      // Also save to localStorage for continuity
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed.data));
+      updateSaveStatus('saved', parsed.savedAt || new Date().toISOString());
+      const dateStr = parsed.savedAt ? new Date(parsed.savedAt).toLocaleString('pt-BR') : 'desconhecida';
+      showToast('⬆ Progresso importado! (salvo em ' + dateStr + ')', 'success');
+    } catch (err) {
+      console.error('[Persistence] importFormData error:', err);
+      showToast('Arquivo inválido ou corrompido. Verifique o JSON.', 'error');
+    }
+  };
+  reader.onerror = function() {
+    showToast('Erro ao ler o arquivo.', 'error');
+  };
+  reader.readAsText(file);
+  // Reset input so same file can be imported again if needed
+  document.getElementById('import-file-input').value = '';
+}
+
+// ── CLEAR ALL DATA ───────────────────────────────────────────────────
+function clearFormData() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    // Clear all inputs
+    document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else {
+        el.value = '';
+      }
+    });
+    // Reset char counters
+    ['ho','es','gm'].forEach(pfx => {
+      const counter = document.getElementById(pfx + '-count');
+      if (counter) { counter.textContent = '0 caracteres'; counter.className = 'char-count'; }
+    });
+    // Reset to first panel
+    switchPanel('ho');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    checkAll();
+    updateSaveStatus('idle');
+    showToast('🗑 Todos os dados foram apagados.', 'warning');
+  } catch (e) {
+    console.error('[Persistence] clearFormData error:', e);
+    showToast('Erro ao limpar dados.', 'error');
+  }
+}
+
+// ── CONFIRM DIALOG ───────────────────────────────────────────────────
+let _confirmCallback = null;
+function showConfirm(title, msg, onConfirm) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  _confirmCallback = onConfirm;
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
+  _confirmCallback = null;
+}
+function confirmClearAll() {
+  showConfirm(
+    'Apagar todos os dados?',
+    'Esta ação irá remover todo o progresso salvo localmente e limpar todos os campos. Isso não pode ser desfeito.',
+    clearFormData
+  );
+}
+document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+  closeConfirm();
+  if (typeof _confirmCallback === 'function') _confirmCallback();
+});
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+// ── UPDATE SAVE STATUS ───────────────────────────────────────────────
+function updateSaveStatus(state, isoTimestamp) {
+  const dot   = document.getElementById('save-dot');
+  const label = document.getElementById('save-label');
+  if (!dot || !label) return;
+  dot.className = 'save-dot';
+  switch (state) {
+    case 'saving':
+      dot.classList.add('saving');
+      label.textContent = 'Salvando...';
+      break;
+    case 'saved': {
+      dot.classList.add('saved');
+      const t = isoTimestamp ? new Date(isoTimestamp) : new Date();
+      const hm = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      label.textContent = 'Salvo às ' + hm;
+      break;
+    }
+    case 'error':
+      dot.classList.add('error');
+      label.textContent = 'Erro ao salvar';
+      break;
+    case 'idle':
+    default:
+      label.textContent = 'Pronto';
+  }
+}
+
+// ── SHOW TOAST ───────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + (type || 'info');
+  toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ') + '</span><span class="toast-msg">' + msg + '</span>';
+  container.appendChild(toast);
+  // Trigger animation
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  const timer = setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 400);
+  }, 3500);
+  toast._timer = timer;
+}
+
+// ── PROGRESS PERCENTAGE ─────────────────────────────────────────────
+function updateProgressPct() {
+  try {
+    const allInputs = document.querySelectorAll('input[required], textarea[required]');
+    let filled = 0;
+    allInputs.forEach(el => { if (el.value && el.value.trim()) filled++; });
+    const pct = allInputs.length > 0 ? Math.round((filled / allInputs.length) * 100) : 0;
+    const pctEl = document.getElementById('progress-pct');
+    if (pctEl) {
+      pctEl.textContent = pct + '%';
+      pctEl.className = 'pct-badge' + (pct >= 80 ? '' : pct >= 30 ? ' warn' : ' empty');
+    }
+    const barFill = document.getElementById('progress-bar-fill');
+    if (barFill) barFill.style.width = pct + '%';
+  } catch(e) {}
+}
+
+// ── INIT PERSISTENCE ────────────────────────────────────────────────
+function initPersistence() {
+  // Load saved data on startup
+  const saved = loadFormData();
+  if (saved) {
+    restoreFormState(saved);
+    const ts = saved.meta && saved.meta.timestamp;
+    updateSaveStatus('saved', ts);
+    showToast('↩ Progresso restaurado automaticamente.', 'info');
+    updateProgressPct();
+  }
+
+  // Event delegation: listen on document for all form inputs (single listener)
+  document.addEventListener('input', scheduleSave);
+  document.addEventListener('change', scheduleSave);
+
+  // Note: switchPanel integration is handled via _onPanelSwitch hook below
+
+  // Save before tab/window close
+  window.addEventListener('beforeunload', () => {
+    clearTimeout(_debounceTimer);
+    saveFormData();
+  });
+
+  // Save scroll position periodically (lightweight, passive)
+  let _scrollTimer = null;
+  window.addEventListener('scroll', () => {
+    clearTimeout(_scrollTimer);
+    _scrollTimer = setTimeout(saveFormData, 800);
+  }, { passive: true });
+
+  // File import handler
+  const importInput = document.getElementById('import-file-input');
+  if (importInput) {
+    importInput.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files[0]) {
+        importFormData(e.target.files[0]);
+      }
+    });
+  }
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let currentPanel = 'ho';
+const panelDone = { ho: false, es: false, gm: false };
+// Hook called after every panel switch — used by persistence module
+let _onPanelSwitch = null;
+
+// ── SWITCH PANEL ───────────────────────────────────────────────────────
+function switchPanel(id) {
+  currentPanel = id;
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+
+  const tabsBar = document.getElementById('tabs-bar');
+  tabsBar.className = 'tabs-bar ctx-' + id;
+
+  // update pill active state
+  ['ho','es','gm'].forEach(p => {
+    const pill = document.getElementById('pill-' + p);
+    pill.classList.remove('active-ho','active-es','active-gm','done');
+    if (panelDone[p] && p !== id) pill.classList.add('done');
+    else if (p === id) pill.classList.add('active-' + id);
+  });
+
+  // Notify persistence module of panel switch
+  if (typeof _onPanelSwitch === 'function') _onPanelSwitch();
+}
+
+// ── VALIDATE PANEL ─────────────────────────────────────────────────────
+function validatePanel(id) {
+  const panel = document.getElementById('panel-' + id);
+  const inputs = panel.querySelectorAll('input[required], textarea[required]');
+  let allFilled = true;
+  inputs.forEach(el => {
+    const v = el.value.trim();
+    if (!v) allFilled = false;
+  });
+  return allFilled;
+}
+
+function checkAll() {
+  let doneCount = 0;
+  ['ho','es','gm'].forEach(id => {
+    const ok = validatePanel(id);
+    panelDone[id] = ok;
+
+    const dot = document.getElementById('dot-' + id);
+    dot.classList.toggle('done', ok);
+
+    const chk = document.getElementById('chk-' + id);
+    chk.textContent = ok ? '✓' : '';
+
+    const pill = document.getElementById('pill-' + id);
+    pill.classList.remove('done','active-ho','active-es','active-gm');
+    if (id === currentPanel) pill.classList.add('active-' + id);
+    else if (ok) pill.classList.add('done');
+
+    if (ok) doneCount++;
+  });
+
+  const txt = document.getElementById('status-text');
+  if (doneCount === 3) {
+    txt.innerHTML = 'Todos os perfis preenchidos — pronto para entregar!';
+  } else {
+    const left = 3 - doneCount;
+    txt.innerHTML = `Faltam <strong>${left} perfil${left > 1 ? 'is' : ''}</strong> para concluir tudo`;
+  }
+}
+
+// live validation + progress percentage
+document.addEventListener('input', () => { checkAll(); updateProgressPct(); });
+document.addEventListener('change', () => { checkAll(); updateProgressPct(); });
+
+// ── COUNT ──────────────────────────────────────────────────────────────
+function updateCount(el, countId) {
+  const n = el.value.length;
+  const span = document.getElementById(countId);
+  span.textContent = n + ' caracteres';
+  span.className = 'char-count' + (n >= 600 ? ' ok' : n >= 300 ? ' warn' : '');
+}
+
+// ── CLEAR CURRENT TAB ────────────────────────────────────────────────
+function clearCurrent() {
+  const panel = document.getElementById('panel-' + currentPanel);
+  panel.querySelectorAll('input, textarea').forEach(el => el.value = '');
+  const counter = document.getElementById(currentPanel + '-count');
+  if (counter) { counter.textContent = '0 caracteres'; counter.className = 'char-count'; }
+  checkAll();
+  updateProgressPct();
+  scheduleSave();
+  showToast('Campos da aba atual foram limpos.', 'info');
+}
+
+// showToast is defined in the persistence module above — legacy calls without 'type' still work
+
+// ── TRY SUBMIT ─────────────────────────────────────────────────────────
+function trySubmit() {
+  checkAll();
+  const hasIncomplete = !panelDone.ho || !panelDone.es || !panelDone.gm;
+  if (hasIncomplete) {
+    alert("Atenção: Algumas informações não foram preenchidas no formulário. Elas aparecerão como 'NÃO FOI PREENCHIDO' em vermelho no PDF.");
+  }
+  generatePDF('all');
+}
+
+// ── TRY SUBMIT CURRENT ──────────────────────────────────────────────────
+function trySubmitCurrent() {
+  checkAll();
+  const currentOk = panelDone[currentPanel];
+  if (!currentOk) {
+    const nameMap = { ho: 'Designer Gráfico', es: 'Escritório', gm: 'PC Gamer' };
+    alert("Atenção: Algumas informações da aba " + nameMap[currentPanel] + " não foram preenchidas. Elas aparecerão como 'NÃO FOI PREENCHIDO' em vermelho no PDF.");
+  }
+  generatePDF(currentPanel);
+}
+
+// ── GET VALUE ─────────────────────────────────────────────────────────
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+// ── PDF ────────────────────────────────────────────────────────────────
+async function generatePDF(targetTab = 'all') {
+  document.getElementById('overlay').classList.add('show');
+  await new Promise(r => setTimeout(r, 80));
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, PAD = 14;
+    const CW = W - PAD * 2;
+    let y = 0;
+
+    function formatUrlLabel(url, maxWidth) {
+      if (!url) return '';
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return url;
+      }
+      if (doc.getTextWidth(url) <= maxWidth) {
+        return url;
+      }
+      let suffix = '...';
+      let truncated = url;
+      while (truncated.length > 0 && doc.getTextWidth(truncated + suffix) > maxWidth) {
+        truncated = truncated.slice(0, -1);
+      }
+      return truncated + suffix;
+    }
+
+    const COLORS = {
+      ho: [37, 99, 235],
+      es: [5, 150, 105],
+      gm: [220, 38, 38],
+      ink: [26, 26, 30],
+      muted: [114, 114, 126],
+      line: [228, 228, 234],
+      pale_ho: [239, 246, 255],
+      pale_es: [236, 253, 245],
+      pale_gm: [254, 242, 242],
+    };
+
+    function newPage() {
+      doc.addPage();
+      y = PAD;
+    }
+
+    function checkY(needed = 10) {
+      if (y + needed > 285) newPage();
+    }
+
+    function hline(color = COLORS.line) {
+      doc.setDrawColor(...color);
+      doc.setLineWidth(0.3);
+      doc.line(PAD, y, W - PAD, y);
+      y += 4;
+    }
+
+    function sectionHead(num, label, accentColor) {
+      checkY(14);
+      doc.setFillColor(...accentColor);
+      doc.roundedRect(PAD, y, 14, 5.5, 1, 1, 'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(7);
+      doc.setTextColor(255,255,255);
+      doc.text(num, PAD + 2, y + 3.8);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(12);
+      doc.setTextColor(...COLORS.ink);
+      doc.text(label, PAD + 18, y + 4);
+      y += 9;
+      doc.setDrawColor(...COLORS.line);
+      doc.setLineWidth(0.3);
+      doc.line(PAD, y, W - PAD, y);
+      y += 4;
+    }
+
+    function row(label, val, indent = 0) {
+      checkY(7);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.muted);
+      doc.text(label.toUpperCase(), PAD + indent, y);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      
+      let drawVal = val;
+      let isUrl = drawVal && (drawVal.startsWith('http://') || drawVal.startsWith('https://'));
+      let displayVal = isUrl ? formatUrlLabel(drawVal, CW - indent - 36) : drawVal;
+      if (!displayVal || displayVal.trim() === '') {
+        doc.setTextColor(220, 38, 38);
+        displayVal = 'NÃO FOI PREENCHIDO';
+      } else if (isUrl) {
+        doc.setTextColor(37, 99, 235);
+      } else {
+        doc.setTextColor(...COLORS.ink);
+      }
+      
+      const lines = doc.splitTextToSize(displayVal, CW - indent - 36);
+      if (isUrl) {
+        doc.textWithLink(lines.join('\n'), PAD + indent + 36, y, { url: drawVal });
+      } else {
+        doc.text(lines, PAD + indent + 36, y);
+      }
+      y += Math.max(5, lines.length * 4.2);
+    }
+
+    function twoRow(l1, v1, l2, v2) {
+      checkY(7);
+      const half = CW / 2 - 4;
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...COLORS.muted);
+      doc.text(l1.toUpperCase(), PAD, y);
+      doc.text(l2.toUpperCase(), PAD + CW/2 + 2, y);
+      y += 3.5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9);
+      
+      let drawV1 = v1;
+      let isUrl1 = drawV1 && (drawV1.startsWith('http://') || drawV1.startsWith('https://'));
+      let displayV1 = isUrl1 ? formatUrlLabel(drawV1, half) : drawV1;
+      if (!displayV1 || displayV1.trim() === '') {
+        doc.setTextColor(220, 38, 38);
+        displayV1 = 'NÃO FOI PREENCHIDO';
+      } else if (isUrl1) {
+        doc.setTextColor(37, 99, 235);
+      } else {
+        doc.setTextColor(...COLORS.ink);
+      }
+      const lines1 = doc.splitTextToSize(displayV1, half);
+      if (isUrl1) {
+        doc.textWithLink(lines1.join('\n'), PAD, y, { url: drawV1 });
+      } else {
+        doc.text(lines1, PAD, y);
+      }
+      
+      let drawV2 = v2;
+      let isUrl2 = drawV2 && (drawV2.startsWith('http://') || drawV2.startsWith('https://'));
+      let displayV2 = isUrl2 ? formatUrlLabel(drawV2, half) : drawV2;
+      if (!displayV2 || displayV2.trim() === '') {
+        doc.setTextColor(220, 38, 38);
+        displayV2 = 'NÃO FOI PREENCHIDO';
+      } else if (isUrl2) {
+        doc.setTextColor(37, 99, 235);
+      } else {
+        doc.setTextColor(...COLORS.ink);
+      }
+      const lines2 = doc.splitTextToSize(displayV2, half);
+      if (isUrl2) {
+        doc.textWithLink(lines2.join('\n'), PAD + CW/2 + 2, y, { url: drawV2 });
+      } else {
+        doc.text(lines2, PAD + CW/2 + 2, y);
+      }
+      
+      const maxLines = Math.max(lines1.length, lines2.length);
+      y += Math.max(5, maxLines * 4.2);
+    }
+
+    function cardHeader(label, accentColor) {
+      checkY(8);
+      doc.setFillColor(...accentColor, 0.08);
+      doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8);
+      doc.setTextColor(...accentColor);
+      doc.text('- ' + label, PAD, y);
+      y += 5;
+    }
+
+    function cmpTable(headers, rows, accentColor) {
+      checkY(30);
+      const cols = [42, 48, 48, 48]; // col widths
+      const xs = [PAD, PAD+42, PAD+90, PAD+138];
+
+      // header row
+      doc.setFillColor(...accentColor);
+      doc.rect(PAD, y, CW, 7, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(255,255,255);
+      headers.forEach((h,i) => doc.text(h, xs[i] + 2, y + 4.8));
+      y += 7;
+
+      rows.forEach((r, ri) => {
+        const rowH = 7;
+        checkY(rowH);
+        if (ri % 2 === 0) {
+          doc.setFillColor(248,248,250);
+          doc.rect(PAD, y, CW, rowH, 'F');
+        }
+        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...COLORS.muted);
+        doc.text(r[0], xs[0] + 2, y + 4.8);
+        
+        r.slice(1).forEach((val, i) => {
+          let drawVal = val;
+          if (!drawVal || drawVal.trim() === '') {
+            doc.setTextColor(220, 38, 38);
+            drawVal = 'NÃO FOI PREENCHIDO';
+          } else {
+            doc.setTextColor(...COLORS.ink);
+          }
+          doc.setFont('helvetica', (!val || val.trim() === '') ? 'bold' : 'normal');
+          const lines = doc.splitTextToSize(drawVal, cols[i+1] - 4);
+          doc.text(lines[0], xs[i+1] + 2, y + 4.8);
+        });
+        y += rowH;
+      });
+      // border
+      doc.setDrawColor(...COLORS.line); doc.setLineWidth(0.3);
+      doc.rect(PAD, y - rows.length * 7 - 7, CW, rows.length * 7 + 7, 'S');
+      y += 4;
+    }
+
+    function conclusao(text) {
+      checkY(10);
+      doc.setFont('helvetica','italic'); doc.setFontSize(9);
+      let drawText = text;
+      if (!drawText || drawText.trim() === '') {
+        doc.setTextColor(220, 38, 38);
+        doc.setFont('helvetica','bold');
+        drawText = 'NÃO FOI PREENCHIDO';
+      } else {
+        doc.setTextColor(...COLORS.ink);
+      }
+      const lines = doc.splitTextToSize(drawText, CW);
+      lines.forEach(line => { checkY(5); doc.text(line, PAD, y); y += 5; });
+      y += 2;
+    }
+
+    function pageTitle(title, subtitle, accentColor, paleColor) {
+      y = PAD;
+      // accent bar
+      doc.setFillColor(...accentColor);
+      doc.rect(0, 0, 5, 297, 'F');
+      // header bg
+      doc.setFillColor(...paleColor);
+      doc.rect(5, 0, 205, 36, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(...accentColor);
+      doc.text('Estudo de Caso', PAD + 2, 14);
+      doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(...COLORS.ink);
+      doc.text(title, PAD + 2, 22);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...COLORS.muted);
+      doc.text(subtitle, PAD + 2, 29);
+      y = 42;
+    }
+
+    function compBlock(title, items, accentColor) {
+      checkY(8);
+      cardHeader(title, accentColor);
+      items.forEach(([l, v1, v2, v3]) => {
+        checkY(6);
+        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...COLORS.muted);
+        doc.text(l.toUpperCase(), PAD + 4, y);
+        
+        let startX = PAD + 40;
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+        
+        let hasLink = v3 && (v3.startsWith('http://') || v3.startsWith('https://'));
+        if (!v1 || v1.trim() === '') {
+          doc.setTextColor(220, 38, 38);
+          doc.setFont('helvetica','bold');
+          doc.text('NÃO FOI PREENCHIDO', startX, y);
+          startX += doc.getTextWidth('NÃO FOI PREENCHIDO ');
+        } else {
+          if (hasLink) {
+            doc.setTextColor(37, 99, 235);
+            doc.textWithLink(v1, startX, y, { url: v3 });
+          } else {
+            doc.setTextColor(...COLORS.ink);
+            doc.text(v1, startX, y);
+          }
+          startX += doc.getTextWidth(v1 + ' ');
+        }
+        
+        doc.setTextColor(...COLORS.muted);
+        doc.setFont('helvetica','bold');
+        doc.text(' · ', startX, y);
+        startX += doc.getTextWidth(' · ');
+        
+        if (!v2 || v2.trim() === '') {
+          doc.setTextColor(220, 38, 38);
+          doc.text('NÃO FOI PREENCHIDO', startX, y);
+        } else {
+          doc.setTextColor(...COLORS.ink);
+          doc.setFont('helvetica','normal');
+          doc.text('R$ ' + v2, startX, y);
+        }
+        y += 5;
+      });
+      y += 2;
+    }
+
+    // ── PANEL DESIGNER GRÁFICO ──
+    if (targetTab === 'ho' || targetTab === 'all') {
+      pageTitle('Designer Gráfico — Criação de Conteúdo',
+        'Softwares: Adobe Photoshop · Illustrator · Dreamweaver · Premiere Pro · After Effects',
+        COLORS.ho, COLORS.pale_ho);
+
+    // ID
+    twoRow('Aluno(s)', v('ho-nome'), 'Turma', v('ho-turma'));
+    row('Data', v('ho-data'));
+    y += 3; hline();
+
+    sectionHead('01','Pesquisa de Notebooks', COLORS.ho);
+    cardHeader('Notebook Intel', COLORS.ho);
+    row('Marca e Modelo', v('ho-nb-i-modelo'), 4);
+    twoRow('Processador', v('ho-nb-i-cpu'), 'GPU', v('ho-nb-i-gpu'));
+    twoRow('RAM', v('ho-nb-i-ram'), 'Armazenamento', v('ho-nb-i-hd'));
+    twoRow('Preço', 'R$ ' + v('ho-nb-i-preco'), 'Fonte', v('ho-nb-i-link'));
+    y += 2;
+    cardHeader('Notebook AMD', COLORS.ho);
+    row('Marca e Modelo', v('ho-nb-a-modelo'), 4);
+    twoRow('Processador', v('ho-nb-a-cpu'), 'GPU', v('ho-nb-a-gpu'));
+    twoRow('RAM', v('ho-nb-a-ram'), 'Armazenamento', v('ho-nb-a-hd'));
+    twoRow('Preço', 'R$ ' + v('ho-nb-a-preco'), 'Fonte', v('ho-nb-a-link'));
+    y += 2; hline();
+
+    sectionHead('02','Desktop Pronto', COLORS.ho);
+    cardHeader('Desktop Intel', COLORS.ho);
+    row('Marca e Modelo', v('ho-dt-i-modelo'), 4);
+    twoRow('Processador', v('ho-dt-i-cpu'), 'GPU', v('ho-dt-i-gpu'));
+    twoRow('RAM', v('ho-dt-i-ram'), 'Armazenamento', v('ho-dt-i-hd'));
+    twoRow('Preço', 'R$ ' + v('ho-dt-i-preco'), 'Fonte', v('ho-dt-i-link'));
+    y += 2;
+    cardHeader('Desktop AMD', COLORS.ho);
+    row('Marca e Modelo', v('ho-dt-a-modelo'), 4);
+    twoRow('Processador', v('ho-dt-a-cpu'), 'GPU', v('ho-dt-a-gpu'));
+    twoRow('RAM', v('ho-dt-a-ram'), 'Armazenamento', v('ho-dt-a-hd'));
+    twoRow('Preço', 'R$ ' + v('ho-dt-a-preco'), 'Fonte', v('ho-dt-a-link'));
+    y += 2; hline();
+
+    sectionHead('03','Montagem Personalizada', COLORS.ho);
+    compBlock('Configuração Intel', [
+      ['CPU', v('ho-mt-i-cpu'), v('ho-mt-i-cpu-p'), v('ho-mt-i-cpu-link')],
+      ['Placa-mãe', v('ho-mt-i-mb'), v('ho-mt-i-mb-p'), v('ho-mt-i-mb-link')],
+      ['RAM', v('ho-mt-i-ram'), v('ho-mt-i-ram-p'), v('ho-mt-i-ram-link')],
+      ['Armazenamento', v('ho-mt-i-hd'), v('ho-mt-i-hd-p'), v('ho-mt-i-hd-link')],
+      ['GPU', v('ho-mt-i-gpu'), v('ho-mt-i-gpu-p'), v('ho-mt-i-gpu-link')],
+      ['Fonte', v('ho-mt-i-psu'), v('ho-mt-i-psu-p'), v('ho-mt-i-psu-link')],
+      ['Monitor', v('ho-mt-i-mon'), v('ho-mt-i-mon-p'), v('ho-mt-i-mon-link')],
+      ['Gabinete + Cooler', v('ho-mt-i-gab'), v('ho-mt-i-gab-p'), v('ho-mt-i-gab-link')],
+    ], COLORS.ho);
+    row('Total Intel (R$)', v('ho-mt-i-total'), 4);
+    y += 3;
+    compBlock('Configuração AMD', [
+      ['CPU', v('ho-mt-a-cpu'), v('ho-mt-a-cpu-p'), v('ho-mt-a-cpu-link')],
+      ['Placa-mãe', v('ho-mt-a-mb'), v('ho-mt-a-mb-p'), v('ho-mt-a-mb-link')],
+      ['RAM', v('ho-mt-a-ram'), v('ho-mt-a-ram-p'), v('ho-mt-a-ram-link')],
+      ['Armazenamento', v('ho-mt-a-hd'), v('ho-mt-a-hd-p'), v('ho-mt-a-hd-link')],
+      ['GPU', v('ho-mt-a-gpu'), v('ho-mt-a-gpu-p'), v('ho-mt-a-gpu-link')],
+      ['Fonte', v('ho-mt-a-psu'), v('ho-mt-a-psu-p'), v('ho-mt-a-psu-link')],
+      ['Monitor', v('ho-mt-a-mon'), v('ho-mt-a-mon-p'), v('ho-mt-a-mon-link')],
+      ['Gabinete + Cooler', v('ho-mt-a-gab'), v('ho-mt-a-gab-p'), v('ho-mt-a-gab-link')],
+    ], COLORS.ho);
+    row('Total AMD (R$)', v('ho-mt-a-total'), 4);
+    y += 2; hline();
+
+    sectionHead('04','Tabela Comparativa', COLORS.ho);
+    cmpTable(
+      ['Critério','Notebook','Desktop Pronto','Montado'],
+      [
+        ['Processador', v('ho-cmp-cpu-nb'), v('ho-cmp-cpu-dt'), v('ho-cmp-cpu-mt')],
+        ['RAM', v('ho-cmp-ram-nb'), v('ho-cmp-ram-dt'), v('ho-cmp-ram-mt')],
+        ['Armazenamento', v('ho-cmp-hd-nb'), v('ho-cmp-hd-dt'), v('ho-cmp-hd-mt')],
+        ['Placa de Vídeo', v('ho-cmp-gpu-nb'), v('ho-cmp-gpu-dt'), v('ho-cmp-gpu-mt')],
+        ['Preço (R$)', v('ho-cmp-preco-nb'), v('ho-cmp-preco-dt'), v('ho-cmp-preco-mt')],
+        ['Vantagens', v('ho-cmp-van-nb'), v('ho-cmp-van-dt'), v('ho-cmp-van-mt')],
+        ['Desvantagens', v('ho-cmp-des-nb'), v('ho-cmp-des-dt'), v('ho-cmp-des-mt')],
+      ], COLORS.ho);
+
+      sectionHead('05','Conclusão', COLORS.ho);
+      conclusao(v('ho-conclusao'));
+    }
+
+    // ── PANEL ESCRITÓRIO ──
+    if (targetTab === 'es' || targetTab === 'all') {
+      if (targetTab === 'all') newPage();
+      pageTitle('Escritório — Produtividade Corporativa',
+        'Softwares: Office 365 · Google Workspace · Teams/Zoom · ERPs · Navegador',
+        COLORS.es, COLORS.pale_es);
+
+      twoRow('Aluno(s)', v('es-nome'), 'Turma', v('es-turma'));
+      row('Data', v('es-data'));
+      y += 3; hline();
+
+      sectionHead('01','Notebooks Corporativos', COLORS.es);
+      cardHeader('Notebook Intel', COLORS.es);
+      row('Marca e Modelo', v('es-nb-i-modelo'), 4);
+      twoRow('Processador', v('es-nb-i-cpu'), 'Bateria', v('es-nb-i-bat'));
+      twoRow('RAM', v('es-nb-i-ram'), 'Armazenamento', v('es-nb-i-hd'));
+      twoRow('Preço', 'R$ ' + v('es-nb-i-preco'), 'Fonte', v('es-nb-i-link'));
+      y += 2;
+      cardHeader('Notebook AMD', COLORS.es);
+      row('Marca e Modelo', v('es-nb-a-modelo'), 4);
+      twoRow('Processador', v('es-nb-a-cpu'), 'Bateria', v('es-nb-a-bat'));
+      twoRow('RAM', v('es-nb-a-ram'), 'Armazenamento', v('es-nb-a-hd'));
+      twoRow('Preço', 'R$ ' + v('es-nb-a-preco'), 'Fonte', v('es-nb-a-link'));
+      y += 2; hline();
+
+      sectionHead('02','Desktops Corporativos Prontos', COLORS.es);
+      cardHeader('Desktop Intel', COLORS.es);
+      row('Marca e Modelo', v('es-dt-i-modelo'), 4);
+      twoRow('Processador', v('es-dt-i-cpu'), 'Conectividade', v('es-dt-i-net'));
+      twoRow('RAM', v('es-dt-i-ram'), 'Armazenamento', v('es-dt-i-hd'));
+      twoRow('Preço', 'R$ ' + v('es-dt-i-preco'), 'Fonte', v('es-dt-i-link'));
+      y += 2;
+      cardHeader('Desktop AMD', COLORS.es);
+      row('Marca e Modelo', v('es-dt-a-modelo'), 4);
+      twoRow('Processador', v('es-dt-a-cpu'), 'Conectividade', v('es-dt-a-net'));
+      twoRow('RAM', v('es-dt-a-ram'), 'Armazenamento', v('es-dt-a-hd'));
+      twoRow('Preço', 'R$ ' + v('es-dt-a-preco'), 'Fonte', v('es-dt-a-link'));
+      y += 2; hline();
+
+      sectionHead('03','Estação de Trabalho Personalizada', COLORS.es);
+      compBlock('Configuração Intel', [
+        ['CPU', v('es-mt-i-cpu'), v('es-mt-i-cpu-p'), v('es-mt-i-cpu-link')],
+        ['Placa-mãe', v('es-mt-i-mb'), v('es-mt-i-mb-p'), v('es-mt-i-mb-link')],
+        ['RAM', v('es-mt-i-ram'), v('es-mt-i-ram-p'), v('es-mt-i-ram-link')],
+        ['Armazenamento', v('es-mt-i-hd'), v('es-mt-i-hd-p'), v('es-mt-i-hd-link')],
+        ['Monitor', v('es-mt-i-mon'), v('es-mt-i-mon-p'), v('es-mt-i-mon-link')],
+        ['Fonte', v('es-mt-i-psu'), v('es-mt-i-psu-p'), v('es-mt-i-psu-link')],
+        ['Gabinete', v('es-mt-i-gab'), v('es-mt-i-gab-p'), v('es-mt-i-gab-link')],
+        ['Periféricos', v('es-mt-i-per'), v('es-mt-i-per-p'), v('es-mt-i-per-link')],
+      ], COLORS.es);
+      row('Total Intel (R$)', v('es-mt-i-total'), 4);
+      y += 3;
+      compBlock('Configuração AMD', [
+        ['CPU', v('es-mt-a-cpu'), v('es-mt-a-cpu-p'), v('es-mt-a-cpu-link')],
+        ['Placa-mãe', v('es-mt-a-mb'), v('es-mt-a-mb-p'), v('es-mt-a-mb-link')],
+        ['RAM', v('es-mt-a-ram'), v('es-mt-a-ram-p'), v('es-mt-a-ram-link')],
+        ['Armazenamento', v('es-mt-a-hd'), v('es-mt-a-hd-p'), v('es-mt-a-hd-link')],
+        ['Monitor', v('es-mt-a-mon'), v('es-mt-a-mon-p'), v('es-mt-a-mon-link')],
+        ['Fonte', v('es-mt-a-psu'), v('es-mt-a-psu-p'), v('es-mt-a-psu-link')],
+        ['Gabinete', v('es-mt-a-gab'), v('es-mt-a-gab-p'), v('es-mt-a-gab-link')],
+        ['Periféricos', v('es-mt-a-per'), v('es-mt-a-per-p'), v('es-mt-a-per-link')],
+      ], COLORS.es);
+      row('Total AMD (R$)', v('es-mt-a-total'), 4);
+      y += 2; hline();
+
+      sectionHead('04','Tabela Comparativa', COLORS.es);
+      cmpTable(
+        ['Critério','Notebook','Desktop Pronto','Montado'],
+        [
+          ['Processador', v('es-cmp-cpu-nb'), v('es-cmp-cpu-dt'), v('es-cmp-cpu-mt')],
+          ['RAM', v('es-cmp-ram-nb'), v('es-cmp-ram-dt'), v('es-cmp-ram-mt')],
+          ['Armazenamento', v('es-cmp-hd-nb'), v('es-cmp-hd-dt'), v('es-cmp-hd-mt')],
+          ['Custo/unidade', v('es-cmp-preco-nb'), v('es-cmp-preco-dt'), v('es-cmp-preco-mt')],
+          ['Manutenção', v('es-cmp-man-nb'), v('es-cmp-man-dt'), v('es-cmp-man-mt')],
+          ['Vantagens', v('es-cmp-van-nb'), v('es-cmp-van-dt'), v('es-cmp-van-mt')],
+          ['Desvantagens', v('es-cmp-des-nb'), v('es-cmp-des-dt'), v('es-cmp-des-mt')],
+        ], COLORS.es);
+
+      sectionHead('05','Conclusão', COLORS.es);
+      conclusao(v('es-conclusao'));
+    }
+
+    // ── PANEL GAMER ──
+    if (targetTab === 'gm' || targetTab === 'all') {
+      if (targetTab === 'all') newPage();
+      pageTitle('PC Gamer — Alto Desempenho',
+        'Games AAA (1080p/1440p/4K) · OBS Studio · Discord · Steam / Epic Games',
+        COLORS.gm, COLORS.pale_gm);
+
+      twoRow('Aluno(s)', v('gm-nome'), 'Turma', v('gm-turma'));
+      row('Data', v('gm-data'));
+      y += 3; hline();
+
+      sectionHead('01','Notebooks Gamer', COLORS.gm);
+      cardHeader('Notebook Intel', COLORS.gm);
+      row('Marca e Modelo', v('gm-nb-i-modelo'), 4);
+      twoRow('Processador', v('gm-nb-i-cpu'), 'GPU + VRAM', v('gm-nb-i-gpu'));
+      twoRow('RAM', v('gm-nb-i-ram'), 'Armazenamento', v('gm-nb-i-hd'));
+      twoRow('Display', v('gm-nb-i-tela'), 'Preço', 'R$ ' + v('gm-nb-i-preco'));
+      row('Fonte', v('gm-nb-i-link'), 4);
+      y += 2;
+      cardHeader('Notebook AMD', COLORS.gm);
+      row('Marca e Modelo', v('gm-nb-a-modelo'), 4);
+      twoRow('Processador', v('gm-nb-a-cpu'), 'GPU + VRAM', v('gm-nb-a-gpu'));
+      twoRow('RAM', v('gm-nb-a-ram'), 'Armazenamento', v('gm-nb-a-hd'));
+      twoRow('Display', v('gm-nb-a-tela'), 'Preço', 'R$ ' + v('gm-nb-a-preco'));
+      row('Fonte', v('gm-nb-a-link'), 4);
+      y += 2; hline();
+
+      sectionHead('02','Desktop Gamer Pronto', COLORS.gm);
+      cardHeader('Desktop Intel', COLORS.gm);
+      row('Marca e Modelo', v('gm-dt-i-modelo'), 4);
+      twoRow('Processador', v('gm-dt-i-cpu'), 'GPU + VRAM', v('gm-dt-i-gpu'));
+      twoRow('RAM', v('gm-dt-i-ram'), 'Armazenamento', v('gm-dt-i-hd'));
+      twoRow('Preço', 'R$ ' + v('gm-dt-i-preco'), 'Fonte', v('gm-dt-i-link'));
+      y += 2;
+      cardHeader('Desktop AMD', COLORS.gm);
+      row('Marca e Modelo', v('gm-dt-a-modelo'), 4);
+      twoRow('Processador', v('gm-dt-a-cpu'), 'GPU + VRAM', v('gm-dt-a-gpu'));
+      twoRow('RAM', v('gm-dt-a-ram'), 'Armazenamento', v('gm-dt-a-hd'));
+      twoRow('Preço', 'R$ ' + v('gm-dt-a-preco'), 'Fonte', v('gm-dt-a-link'));
+      y += 2; hline();
+
+      sectionHead('03','PC Gamer Personalizado', COLORS.gm);
+      compBlock('Configuração Intel', [
+        ['CPU', v('gm-mt-i-cpu'), v('gm-mt-i-cpu-p'), v('gm-mt-i-cpu-link')],
+        ['Placa-mãe', v('gm-mt-i-mb'), v('gm-mt-i-mb-p'), v('gm-mt-i-mb-link')],
+        ['RAM', v('gm-mt-i-ram'), v('gm-mt-i-ram-p'), v('gm-mt-i-ram-link')],
+        ['Armazenamento', v('gm-mt-i-hd'), v('gm-mt-i-hd-p'), v('gm-mt-i-hd-link')],
+        ['GPU', v('gm-mt-i-gpu'), v('gm-mt-i-gpu-p'), v('gm-mt-i-gpu-link')],
+        ['Fonte', v('gm-mt-i-psu'), v('gm-mt-i-psu-p'), v('gm-mt-i-psu-link')],
+        ['Monitor Gamer', v('gm-mt-i-mon'), v('gm-mt-i-mon-p'), v('gm-mt-i-mon-link')],
+        ['Gabinete + Cooler', v('gm-mt-i-gab'), v('gm-mt-i-gab-p'), v('gm-mt-i-gab-link')],
+      ], COLORS.gm);
+      row('Total Intel (R$)', v('gm-mt-i-total'), 4);
+      y += 3;
+      compBlock('Configuração AMD', [
+        ['CPU', v('gm-mt-a-cpu'), v('gm-mt-a-cpu-p'), v('gm-mt-a-cpu-link')],
+        ['Placa-mãe', v('gm-mt-a-mb'), v('gm-mt-a-mb-p'), v('gm-mt-a-mb-link')],
+        ['RAM', v('gm-mt-a-ram'), v('gm-mt-a-ram-p'), v('gm-mt-a-ram-link')],
+        ['Armazenamento', v('gm-mt-a-hd'), v('gm-mt-a-hd-p'), v('gm-mt-a-hd-link')],
+        ['GPU', v('gm-mt-a-gpu'), v('gm-mt-a-gpu-p'), v('gm-mt-a-gpu-link')],
+        ['Fonte', v('gm-mt-a-psu'), v('gm-mt-a-psu-p'), v('gm-mt-a-psu-link')],
+        ['Monitor Gamer', v('gm-mt-a-mon'), v('gm-mt-a-mon-p'), v('gm-mt-a-mon-link')],
+        ['Gabinete + Cooler', v('gm-mt-a-gab'), v('gm-mt-a-gab-p'), v('gm-mt-a-gab-link')],
+      ], COLORS.gm);
+      row('Total AMD (R$)', v('gm-mt-a-total'), 4);
+      y += 2; hline();
+
+      sectionHead('04','Tabela Comparativa', COLORS.gm);
+      cmpTable(
+        ['Critério','Notebook','Desktop Pronto','PC Montado'],
+        [
+          ['Processador', v('gm-cmp-cpu-nb'), v('gm-cmp-cpu-dt'), v('gm-cmp-cpu-mt')],
+          ['GPU + VRAM', v('gm-cmp-gpu-nb'), v('gm-cmp-gpu-dt'), v('gm-cmp-gpu-mt')],
+          ['RAM', v('gm-cmp-ram-nb'), v('gm-cmp-ram-dt'), v('gm-cmp-ram-mt')],
+          ['Taxa Refresh', v('gm-cmp-hz-nb'), v('gm-cmp-hz-dt'), v('gm-cmp-hz-mt')],
+          ['Preço (R$)', v('gm-cmp-preco-nb'), v('gm-cmp-preco-dt'), v('gm-cmp-preco-mt')],
+          ['Vantagens', v('gm-cmp-van-nb'), v('gm-cmp-van-dt'), v('gm-cmp-van-mt')],
+          ['Desvantagens', v('gm-cmp-des-nb'), v('gm-cmp-des-dt'), v('gm-cmp-des-mt')],
+        ], COLORS.gm);
+
+      sectionHead('05','Conclusão', COLORS.gm);
+      conclusao(v('gm-conclusao'));
+    }
+
+    // save
+    const nomeAluno = (targetTab === 'all' ? (v('ho-nome') || v('es-nome') || v('gm-nome')) : v(targetTab + '-nome')) || 'atividade';
+    const tabName = targetTab === 'all' ? 'completo' : (targetTab === 'ho' ? 'designer-grafico' : targetTab === 'es' ? 'escritorio' : 'pc-gamer');
+    const filename = 'estudo-de-caso-' + tabName + '-' + nomeAluno.split(/[\s\/]/)[0].toLowerCase() + '.pdf';
+    doc.save(filename);
+
+  } catch(e) {
+    console.error(e);
+    showToast('Erro ao gerar PDF. Tente novamente.');
+  }
+
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+checkAll();
+updateProgressPct();
+// Wire persistence hook into switchPanel
+_onPanelSwitch = scheduleSave;
+// Initialize persistence (loads saved state, sets up listeners)
+initPersistence();
+</script>
+</body>
+</html>
+

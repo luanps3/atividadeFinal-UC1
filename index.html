@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Atividade prática de estudo de caso: pesquise, compare e justifique a melhor solução de hardware para Designer Gráfico, Escritório e PC Gamer.">
+<title>Estudo de Caso — Escolha de Equipamento</title>
+
+<!-- jsPDF (geração de PDF no browser) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Fontes -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Design System -->
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <div class="masthead-eyebrow">Atividade Prática · Estudo de Caso</div>
+        <h1>Escolha de <em>Equipamento</em></h1>
+        <p class="masthead-sub">Pesquise, compare e justifique a melhor solução de hardware para cada um dos três perfis abaixo. Todos os campos são obrigatórios.</p>
+      </div>
+      <div class="progress-pills">
+        <div class="pill active-ho" id="pill-ho" onclick="switchPanel('ho')">
+          <div class="pill-check" id="chk-ho"></div>
+          Designer Gráfico
+        </div>
+        <div class="pill" id="pill-es" onclick="switchPanel('es')">
+          <div class="pill-check" id="chk-es"></div>
+          Escritório
+        </div>
+        <div class="pill" id="pill-gm" onclick="switchPanel('gm')">
+          <div class="pill-check" id="chk-gm"></div>
+          PC Gamer
+        </div>
+      </div>
+    </div>
+    <div class="tabs-bar ctx-ho" id="tabs-bar">
+      <div class="tab-item active" id="tab-ho" onclick="switchPanel('ho')">🎨 Designer Gráfico</div>
+      <div class="tab-item" id="tab-es" onclick="switchPanel('es')">🏢 Escritório</div>
+      <div class="tab-item" id="tab-gm" onclick="switchPanel('gm')">🎮 PC Gamer</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ PANEL: DESIGNER GRÁFICO ═══ -->
+  <div class="panel ctx-ho active" id="panel-ho">
+
+    <div class="ctx-header">
+      <h2>Designer Gráfico — Criação de Conteúdo</h2>
+      <p>Um cliente recebeu uma proposta para trabalhar como designer gráfico e precisa de equipamento com alto desempenho gráfico. Ele utilizará regularmente os softwares abaixo:</p>
+      <div class="tags">
+        <span class="tag">Adobe Photoshop</span>
+        <span class="tag">Illustrator</span>
+        <span class="tag">Dreamweaver</span>
+        <span class="tag">Premiere Pro</span>
+        <span class="tag">After Effects</span>
+      </div>
+    </div>
+
+    <!-- Identificação -->
+    <div class="section">
+      <div class="id-row">
+        <div class="field">
+          <label>Nome(s) do(s) aluno(s)</label>
+          <input type="text" id="ho-nome" placeholder="Ex.: João Silva / Maria Souza" required>
+        </div>
+        <div class="field">
+          <label>Turma</label>
+          <input type="text" id="ho-turma" placeholder="Ex.: 3A" required>
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="ho-data" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. Notebooks -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <span class="section-title">Pesquisa de Notebooks</span>
+      </div>
+      <p class="section-hint">Pesquise dois modelos novos — um com processador Intel e outro AMD — adequados para uso intenso do pacote Adobe.</p>
+      <div class="two-col">
+        <div class="card" id="card-ho-nb-i">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-nb-i-modelo" placeholder="Ex.: Dell Inspiron 15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-nb-i-cpu" placeholder="Ex.: Intel Core i7-1355U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-nb-i-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-nb-i-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-nb-i-gpu" placeholder="Ex.: RTX 3050 4 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-ho-nb-a">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-nb-a-modelo" placeholder="Ex.: Lenovo IdeaPad 5" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-nb-a-cpu" placeholder="Ex.: AMD Ryzen 7 7730U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-nb-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-nb-a-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-nb-a-gpu" placeholder="Ex.: RX 6500M" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Desktop Pronto -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <span class="section-title">Computador Desktop Pronto</span>
+      </div>
+      <p class="section-hint">Pesquise dois computadores de fábrica (já montados), um Intel e um AMD.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-dt-i-modelo" placeholder="Ex.: HP Victus Desktop" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-dt-i-cpu" placeholder="Ex.: Intel Core i7-13700" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-dt-i-ram" placeholder="Ex.: 32 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-dt-i-hd" placeholder="Ex.: SSD 1 TB NVMe" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-dt-i-gpu" placeholder="Ex.: RTX 4060 8 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="ho-dt-a-modelo" placeholder="Ex.: Lenovo Legion Tower" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="ho-dt-a-cpu" placeholder="Ex.: AMD Ryzen 9 7900" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="ho-dt-a-ram" placeholder="Ex.: 32 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="ho-dt-a-hd" placeholder="Ex.: SSD 1 TB NVMe" required></div>
+            </div>
+            <div class="field"><label>Placa de Vídeo</label><input type="text" id="ho-dt-a-gpu" placeholder="Ex.: RX 7700 XT" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="ho-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="ho-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Montagem -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <span class="section-title">Montagem Personalizada</span>
+      </div>
+      <p class="section-hint">Monte uma configuração completa para cada plataforma. Liste marca, modelo, especificações e preço de cada componente.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="ho-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="ho-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="ho-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="ho-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="ho-mt-i-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="ho-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="ho-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="ho-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-i-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="ho-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="ho-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="ho-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="ho-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="ho-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="ho-mt-a-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="ho-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="ho-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="ho-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="ho-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="ho-mt-a-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="ho-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Comparação -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <span class="section-title">Tabela Comparativa</span>
+      </div>
+      <p class="section-hint">Preencha com os dados dos melhores modelos encontrados em cada categoria.</p>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook</th><th>Desktop Pronto</th><th>Computador Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="ho-cmp-cpu-nb" required></td><td><input type="text" id="ho-cmp-cpu-dt" required></td><td><input type="text" id="ho-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="ho-cmp-ram-nb" required></td><td><input type="text" id="ho-cmp-ram-dt" required></td><td><input type="text" id="ho-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Armazenamento</td><td><input type="text" id="ho-cmp-hd-nb" required></td><td><input type="text" id="ho-cmp-hd-dt" required></td><td><input type="text" id="ho-cmp-hd-mt" required></td></tr>
+            <tr><td class="row-lbl">Placa de Vídeo</td><td><input type="text" id="ho-cmp-gpu-nb" required></td><td><input type="text" id="ho-cmp-gpu-dt" required></td><td><input type="text" id="ho-cmp-gpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Preço Total (R$)</td><td><input type="text" id="ho-cmp-preco-nb" required></td><td><input type="text" id="ho-cmp-preco-dt" required></td><td><input type="text" id="ho-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="ho-cmp-van-nb" required></td><td><input type="text" id="ho-cmp-van-dt" required></td><td><input type="text" id="ho-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="ho-cmp-des-nb" required></td><td><input type="text" id="ho-cmp-des-dt" required></td><td><input type="text" id="ho-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. Conclusão -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <span class="section-title">Conclusão</span>
+      </div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Justifique qual solução tem melhor custo-benefício considerando o perfil do cliente (desempenho Adobe, portabilidade, upgrade).</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="ho-conclusao" placeholder="Com base nas pesquisas realizadas..." required oninput="updateCount(this,'ho-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="ho-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-ho -->
+
+  <!-- ═══════════════════════════════════ PANEL: ESCRITÓRIO ═══ -->
+  <div class="panel ctx-es" id="panel-es">
+
+    <div class="ctx-header">
+      <h2>Escritório — Produtividade Corporativa</h2>
+      <p>Uma empresa precisa equipar estações de trabalho para o setor administrativo. O foco é produtividade, estabilidade, baixo custo de manutenção e facilidade de gerenciamento em rede.</p>
+      <div class="tags">
+        <span class="tag">Microsoft Office 365</span>
+        <span class="tag">Google Workspace</span>
+        <span class="tag">Teams / Zoom</span>
+        <span class="tag">ERPs corporativos</span>
+        <span class="tag">Navegador / E-mail</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="id-row">
+        <div class="field"><label>Nome(s) do(s) aluno(s)</label><input type="text" id="es-nome" placeholder="Ex.: João Silva / Maria Souza" required></div>
+        <div class="field"><label>Turma</label><input type="text" id="es-turma" placeholder="Ex.: 3A" required></div>
+        <div class="field"><label>Data</label><input type="date" id="es-data" required></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">01</span><span class="section-title">Notebooks Corporativos</span></div>
+      <p class="section-hint">Pesquise modelos voltados ao uso empresarial — durabilidade, garantia e ergonomia são diferenciais relevantes.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-nb-i-modelo" placeholder="Ex.: Lenovo ThinkPad E15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-nb-i-cpu" placeholder="Ex.: Intel Core i5-1235U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-nb-i-ram" placeholder="Ex.: 8 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-nb-i-hd" placeholder="Ex.: SSD 256 GB" required></div>
+            </div>
+            <div class="field"><label>Autonomia da Bateria</label><input type="text" id="es-nb-i-bat" placeholder="Ex.: até 10h" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-nb-a-modelo" placeholder="Ex.: HP EliteBook 845" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-nb-a-cpu" placeholder="Ex.: AMD Ryzen 5 7530U" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-nb-a-ram" placeholder="Ex.: 8 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-nb-a-hd" placeholder="Ex.: SSD 256 GB" required></div>
+            </div>
+            <div class="field"><label>Autonomia da Bateria</label><input type="text" id="es-nb-a-bat" placeholder="Ex.: até 12h" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">02</span><span class="section-title">Desktops Prontos Corporativos</span></div>
+      <p class="section-hint">Priorize modelos com suporte técnico empresarial e boa disponibilidade de peças.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-dt-i-modelo" placeholder="Ex.: Dell OptiPlex 5000" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-dt-i-cpu" placeholder="Ex.: Intel Core i5-12500" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-dt-i-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-dt-i-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Conectividade</label><input type="text" id="es-dt-i-net" placeholder="Ex.: Wi-Fi 6, Bluetooth 5.2" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="es-dt-a-modelo" placeholder="Ex.: HP ProDesk 405" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="es-dt-a-cpu" placeholder="Ex.: AMD Ryzen 5 5600G" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="es-dt-a-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="es-dt-a-hd" placeholder="Ex.: SSD 512 GB" required></div>
+            </div>
+            <div class="field"><label>Conectividade</label><input type="text" id="es-dt-a-net" placeholder="Ex.: Wi-Fi 6, Bluetooth 5.0" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="es-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="es-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">03</span><span class="section-title">Estação de Trabalho Personalizada</span></div>
+      <p class="section-hint">Monte configurações enxutas e eficientes — GPUs dedicadas não são necessárias para esse perfil.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="es-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="es-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="es-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="es-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="es-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="es-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete</div><div class="field"><input type="text" id="es-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-gab-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Periféricos</div><div class="field"><input type="text" id="es-mt-i-per" placeholder="Teclado + Mouse" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-i-per-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-i-per-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="es-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="es-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="es-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="es-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="es-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor</div><div class="field"><input type="text" id="es-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="es-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete</div><div class="field"><input type="text" id="es-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-gab-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Periféricos</div><div class="field"><input type="text" id="es-mt-a-per" placeholder="Teclado + Mouse" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="es-mt-a-per-p" placeholder="R$" required></div><div class="field"><input type="url" id="es-mt-a-per-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="es-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">04</span><span class="section-title">Tabela Comparativa</span></div>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook</th><th>Desktop Pronto</th><th>Computador Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="es-cmp-cpu-nb" required></td><td><input type="text" id="es-cmp-cpu-dt" required></td><td><input type="text" id="es-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="es-cmp-ram-nb" required></td><td><input type="text" id="es-cmp-ram-dt" required></td><td><input type="text" id="es-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Armazenamento</td><td><input type="text" id="es-cmp-hd-nb" required></td><td><input type="text" id="es-cmp-hd-dt" required></td><td><input type="text" id="es-cmp-hd-mt" required></td></tr>
+            <tr><td class="row-lbl">Custo por unidade</td><td><input type="text" id="es-cmp-preco-nb" required></td><td><input type="text" id="es-cmp-preco-dt" required></td><td><input type="text" id="es-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Facilidade de manutenção</td><td><input type="text" id="es-cmp-man-nb" required></td><td><input type="text" id="es-cmp-man-dt" required></td><td><input type="text" id="es-cmp-man-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="es-cmp-van-nb" required></td><td><input type="text" id="es-cmp-van-dt" required></td><td><input type="text" id="es-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="es-cmp-des-nb" required></td><td><input type="text" id="es-cmp-des-dt" required></td><td><input type="text" id="es-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">05</span><span class="section-title">Conclusão</span></div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Considere: custo por unidade, escalabilidade para múltiplos postos, facilidade de manutenção e suporte técnico.</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="es-conclusao" placeholder="Com base nas pesquisas realizadas, para um ambiente corporativo..." required oninput="updateCount(this,'es-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="es-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-es -->
+
+  <!-- ═══════════════════════════════════ PANEL: PC GAMER ═══ -->
+  <div class="panel ctx-gm" id="panel-gm">
+
+    <div class="ctx-header">
+      <h2>PC Gamer — Alto Desempenho</h2>
+      <p>Um cliente quer montar ou adquirir um PC Gamer para jogar títulos AAA modernos com alta taxa de quadros, possibilitando também o streaming de gameplay.</p>
+      <div class="tags">
+        <span class="tag">Games AAA (1080p/1440p/4K)</span>
+        <span class="tag">OBS Studio</span>
+        <span class="tag">Discord</span>
+        <span class="tag">Steam / Epic</span>
+        <span class="tag">Alta taxa de FPS</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="id-row">
+        <div class="field"><label>Nome(s) do(s) aluno(s)</label><input type="text" id="gm-nome" placeholder="Ex.: João Silva / Maria Souza" required></div>
+        <div class="field"><label>Turma</label><input type="text" id="gm-turma" placeholder="Ex.: 3A" required></div>
+        <div class="field"><label>Data</label><input type="date" id="gm-data" required></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">01</span><span class="section-title">Notebooks Gamer</span></div>
+      <p class="section-hint">Priorize GPU dedicada com boa VRAM e tela com alta taxa de atualização (Hz).</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Notebook Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-nb-i-modelo" placeholder="Ex.: ASUS ROG Strix G15" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-nb-i-cpu" placeholder="Ex.: Intel Core i7-13650HX" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-nb-i-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-nb-i-hd" placeholder="Ex.: SSD 1 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-nb-i-gpu" placeholder="Ex.: RTX 4060 8 GB" required></div>
+            <div class="field"><label>Display (Hz / resolução)</label><input type="text" id="gm-nb-i-tela" placeholder="Ex.: 144Hz Full HD IPS" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-nb-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-nb-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Notebook AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-nb-a-modelo" placeholder="Ex.: Lenovo Legion 5 Pro" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-nb-a-cpu" placeholder="Ex.: AMD Ryzen 7 7745HX" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-nb-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-nb-a-hd" placeholder="Ex.: SSD 1 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-nb-a-gpu" placeholder="Ex.: RX 7600M XT 8 GB" required></div>
+            <div class="field"><label>Display (Hz / resolução)</label><input type="text" id="gm-nb-a-tela" placeholder="Ex.: 165Hz 2K IPS" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-nb-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-nb-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">02</span><span class="section-title">Desktop Gamer Pronto</span></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Desktop Intel</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-dt-i-modelo" placeholder="Ex.: Pichau Thunder Intel" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-dt-i-cpu" placeholder="Ex.: Intel Core i5-13600K" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-dt-i-ram" placeholder="Ex.: 16 GB DDR4" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-dt-i-hd" placeholder="Ex.: SSD 500 GB + HD 2 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-dt-i-gpu" placeholder="Ex.: RTX 4070 12 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-dt-i-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-dt-i-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Desktop AMD</div>
+          <div class="fields-stack">
+            <div class="field"><label>Marca e Modelo</label><input type="text" id="gm-dt-a-modelo" placeholder="Ex.: Pichau Thunder AMD" required></div>
+            <div class="field"><label>Processador</label><input type="text" id="gm-dt-a-cpu" placeholder="Ex.: AMD Ryzen 5 7600X" required></div>
+            <div class="two-fields">
+              <div class="field"><label>RAM</label><input type="text" id="gm-dt-a-ram" placeholder="Ex.: 16 GB DDR5" required></div>
+              <div class="field"><label>Armazenamento</label><input type="text" id="gm-dt-a-hd" placeholder="Ex.: SSD 500 GB + HD 2 TB" required></div>
+            </div>
+            <div class="field"><label>GPU + VRAM</label><input type="text" id="gm-dt-a-gpu" placeholder="Ex.: RX 7700 XT 12 GB" required></div>
+            <div class="two-fields">
+              <div class="field"><label>Preço (R$)</label><input type="number" id="gm-dt-a-preco" placeholder="0,00" required></div>
+              <div class="field"><label>Link da Fonte</label><input type="url" id="gm-dt-a-link" placeholder="https://..." required></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">03</span><span class="section-title">PC Gamer Personalizado</span></div>
+      <p class="section-hint">Monte o setup ideal. Lembre-se de equilibrar CPU e GPU para evitar gargalos, e use fonte com folga de potência.</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Configuração Intel</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="gm-mt-i-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="gm-mt-i-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="gm-mt-i-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="gm-mt-i-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="gm-mt-i-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="gm-mt-i-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor Gamer</div><div class="field"><input type="text" id="gm-mt-i-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="gm-mt-i-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-i-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-i-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="gm-mt-i-total" placeholder="Soma dos componentes" required></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Configuração AMD</div>
+          <div class="comp-grid">
+            <div class="comp-item"><div class="comp-item-title">CPU</div><div class="field"><input type="text" id="gm-mt-a-cpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-cpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-cpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Placa-mãe</div><div class="field"><input type="text" id="gm-mt-a-mb" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-mb-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-mb-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">RAM</div><div class="field"><input type="text" id="gm-mt-a-ram" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-ram-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-ram-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Armazenamento</div><div class="field"><input type="text" id="gm-mt-a-hd" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-hd-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-hd-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">GPU</div><div class="field"><input type="text" id="gm-mt-a-gpu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-gpu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-gpu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Fonte</div><div class="field"><input type="text" id="gm-mt-a-psu" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-psu-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-psu-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Monitor Gamer</div><div class="field"><input type="text" id="gm-mt-a-mon" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-mon-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-mon-link" placeholder="Link" required></div></div></div>
+            <div class="comp-item"><div class="comp-item-title">Gabinete + Cooler</div><div class="field"><input type="text" id="gm-mt-a-gab" placeholder="Modelo" required></div><div class="two-fields" style="margin-top:6px"><div class="field"><input type="number" id="gm-mt-a-gab-p" placeholder="R$" required></div><div class="field"><input type="url" id="gm-mt-a-gab-link" placeholder="Link" required></div></div></div>
+          </div>
+          <div class="field"><label>Total estimado (R$)</label><input type="number" id="gm-mt-a-total" placeholder="Soma dos componentes" required></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">04</span><span class="section-title">Tabela Comparativa</span></div>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead><tr><th>Critério</th><th>Notebook Gamer</th><th>Desktop Pronto</th><th>PC Montado</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Processador</td><td><input type="text" id="gm-cmp-cpu-nb" required></td><td><input type="text" id="gm-cmp-cpu-dt" required></td><td><input type="text" id="gm-cmp-cpu-mt" required></td></tr>
+            <tr><td class="row-lbl">GPU + VRAM</td><td><input type="text" id="gm-cmp-gpu-nb" required></td><td><input type="text" id="gm-cmp-gpu-dt" required></td><td><input type="text" id="gm-cmp-gpu-mt" required></td></tr>
+            <tr><td class="row-lbl">Memória RAM</td><td><input type="text" id="gm-cmp-ram-nb" required></td><td><input type="text" id="gm-cmp-ram-dt" required></td><td><input type="text" id="gm-cmp-ram-mt" required></td></tr>
+            <tr><td class="row-lbl">Taxa de Refresh (Hz)</td><td><input type="text" id="gm-cmp-hz-nb" required></td><td><input type="text" id="gm-cmp-hz-dt" required></td><td><input type="text" id="gm-cmp-hz-mt" required></td></tr>
+            <tr><td class="row-lbl">Preço Total (R$)</td><td><input type="text" id="gm-cmp-preco-nb" required></td><td><input type="text" id="gm-cmp-preco-dt" required></td><td><input type="text" id="gm-cmp-preco-mt" required></td></tr>
+            <tr><td class="row-lbl">Vantagens</td><td><input type="text" id="gm-cmp-van-nb" required></td><td><input type="text" id="gm-cmp-van-dt" required></td><td><input type="text" id="gm-cmp-van-mt" required></td></tr>
+            <tr><td class="row-lbl">Desvantagens</td><td><input type="text" id="gm-cmp-des-nb" required></td><td><input type="text" id="gm-cmp-des-dt" required></td><td><input type="text" id="gm-cmp-des-mt" required></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-num">05</span><span class="section-title">Conclusão</span></div>
+      <div class="notice"><span>⚠</span><span>Mínimo de 10 linhas. Considere: FPS esperado nos títulos pesquisados, upgradabilidade futura, portabilidade e custo-benefício para gaming.</span></div>
+      <div class="conclusion-wrap">
+        <div class="field">
+          <label>Análise e justificativa final</label>
+          <textarea id="gm-conclusao" placeholder="Com base nas pesquisas realizadas, para um perfil gamer..." required oninput="updateCount(this,'gm-count')"></textarea>
+        </div>
+        <div class="char-line">
+          <span id="gm-count" class="char-count">0 caracteres</span>
+          <span style="font-size:12px;color:var(--ink3)">Mínimo recomendado: ~600 caracteres</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="section">
+      <div class="section-header"><span class="section-num">📋</span><span class="section-title">Critérios de Avaliação</span></div>
+      <div class="criteria">
+        <div class="criteria-row"><span>Qualidade e relevância das pesquisas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Correção das especificações técnicas</span><span class="criteria-badge">25%</span></div>
+        <div class="criteria-row"><span>Organização e apresentação</span><span class="criteria-badge">20%</span></div>
+        <div class="criteria-row"><span>Tabela comparativa</span><span class="criteria-badge">15%</span></div>
+        <div class="criteria-row"><span>Conclusão e justificativa</span><span class="criteria-badge">15%</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-gm -->
+
+</div><!-- /wrap -->
+
+<!-- INPUT OCULTO PARA IMPORTAÇÃO -->
+<input type="file" id="import-file-input" accept=".json" style="display:none">
+
+<!-- MODAL DE CONFIRMAÇÃO -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-card">
+    <h3 id="confirm-title">Confirmar ação</h3>
+    <p id="confirm-msg">Tem certeza?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <div class="bottom-left">
+      <div class="bottom-status">
+        <div class="status-dot" id="dot-ho"></div>
+        <div class="status-dot" id="dot-es"></div>
+        <div class="status-dot" id="dot-gm"></div>
+        <span class="bottom-text" id="status-text">Preencha os <strong>3 perfis</strong> para liberar a entrega</span>
+        <span id="progress-pct" class="pct-badge empty">0%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+      </div>
+      <div class="bottom-actions">
+        <div class="save-status" id="save-status">
+          <div class="save-dot" id="save-dot"></div>
+          <span id="save-label">Pronto</span>
+        </div>
+        <button class="btn-xs" id="btn-export" onclick="exportFormData()" title="Exportar progresso como JSON">⬇ Exportar</button>
+        <button class="btn-xs" id="btn-import" onclick="document.getElementById('import-file-input').click()" title="Importar progresso de JSON">⬆ Importar</button>
+        <button class="btn-xs danger" id="btn-clear-all" onclick="confirmClearAll()" title="Limpar todos os dados">🗑 Limpar tudo</button>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="clearCurrent()">Limpar aba atual</button>
+      <button class="btn btn-ghost" id="btn-submit-current" onclick="trySubmitCurrent()">Gerar PDF da Aba Atual</button>
+      <button class="btn btn-primary" id="btn-submit" onclick="trySubmit()">Gerar PDF Completo</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY PDF -->
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <div class="spinner"></div>
+    <h3>Gerando PDF…</h3>
+    <p>Compilando as respostas. Isso pode levar alguns segundos.</p>
+  </div>
+</div>
+
+<!-- CONTAINER DE TOASTS -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SCRIPTS — Ordem de carregamento obrigatória:
+     1. ui.js      → utilitários visuais (sem dependências locais)
+     2. storage.js → persistência (depende de ui.js)
+     3. app.js     → lógica principal (depende de ui.js e storage.js)
+     ════════════════════════════════════════════════════════════════════════ -->
+<script src="js/ui.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
